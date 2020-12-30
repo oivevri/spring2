@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="co.company.spring.dao.EmpMapper">
+
+	<!-- 단건조회 -->
+	<select id="getEmp" parameterType="emp" resultType="emp">
+		SELECT
+		first_name,
+		last_name,
+		employee_id,
+		salary,
+		department_id,
+		email,
+		hire_date,
+		job_id
+		FROM employees
+		WHERE
+		employee_id = #{employeeId}
+	</select>
+
+	<!-- 전체조회 -->
+	<select id="getEmpList" resultType="emp">
+		SELECT rownum id, e.*
+		FROM employees e
+		<where>
+
+			<if test="minSalary != null and maxSalary != null">
+				SALARY BETWEEN #{minSalary} AND #{maxSalary}
+			</if>
+
+		</where>
+		ORDER BY first_name
+	</select>
+
+
+	<!-- <if test="firstName != null"> and upper(first_name) like '%' || upper(#{firstName}) 
+		|| '%' </if> <if test="departmentId != null"> and department_id = #{departmentId} 
+		</if> <if test="salary != null and salary != '' "> <![CDATA[ AND SALARY < 
+		#{salary}]]> </if> -->
+
+	<update id="updateAuthorIfNecessary">
+		update Author
+		<set>
+			<if test="username != null">username=#{username},</if>
+			<if test="password != null">password=#{password},</if>
+			<if test="email != null">email=#{email},</if>
+			<if test="bio != null">bio=#{bio}</if>
+		</set>
+		where id=#{id}
+	</update>
+
+
+	<!-- <insert id="insertEmp" parameterType="emp"> INSERT INTO EMPLOYEES ( 
+		employee_id, first_name, last_name, email, hire_date, job_id ) VALUES( #{employeeId}, 
+		#{firstName}, #{lastName}, #{email}, #{hireDate}, #{jobId}) </insert> -->
+	<delete id="deleteEmp">
+		DELETE EMPLOYEES
+		WHERE EMPLOYEE_ID = #{employeeID}
+	</delete>
+
+	<delete id="deleteMultiEmp">
+		DELETE EMPLOYEES
+		WHERE EMPLOYEE_ID IN
+		<foreach collection="list" item="id" open="(" close=")"
+			separator=",">
+			#{id}
+		</foreach>
+	</delete>
+
+	<insert id="insertEmp" parameterType="emp">
+		<selectKey order="BEFORE" keyProperty="employeeId"
+			resultType="string">
+			SELECT MAX(EMPLOYEE_ID)+1
+			FROM EMPLOYEES
+		</selectKey>
+		INSERT INTO EMPLOYEES (
+		employee_id,
+		first_name,
+		last_name,
+		email,
+		hire_date,
+		job_id
+		)
+		VALUES(
+		#{employeeId},
+		#{firstName},
+		#{lastName},
+		#{email},
+		#{hireDate},
+		#{jobId})
+	</insert>
+
+	<!-- out?왜쓰는거데 그러면 -->
+	<insert id="insertEmpProc" statementType="CALLABLE">
+		{call INS_EMP(
+		#{lastName},
+		#{email},
+		#{jobId},
+		#{msg, mode=OUT, jdbcType=VARCHAR, javaType=string},
+		#{employeeId, mode=OUT, jdbcType=VARCHAR, javaType=string}
+
+		)}
+	</insert>
+
+	<select id="getCount" resultType="int">
+		SELECT COUNT(*) FROM EMPLOYEES
+	</select>
+
+	<!-- 부서별 사원 수 부서번호, 부서명, 사원수 -->
+	<select id="getStatDept" resultType="map">
+		<!-- 부서번호, 부서명, 사원수를 vo에 담기 귀찮으면 map을 사용할 수 있음 -->
+		SELECT E.DEPARTMENT_ID "deptId",
+		D.DEPARTMENT_NAME "deptName",
+		COUNT(*) "cnt"
+		<!-- COUNT(*) OVER() as CNT -->
+		FROM EMPLOYEES E, DEPARTMENTS D
+		WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID
+		GROUP BY E.DEPARTMENT_ID,
+		D.DEPARTMENT_NAME
+	</select>
+	
+	<select id="jobSelect" resultType="co.company.spring.dao.Job">
+		SELECT JOB_ID, JOB_TITLE
+			FROM JOBS
+			ORDER BY JOB_ID
+	</select>
+	
+	<select id="departmentSelect" resultType="co.company.spring.dao.Department">
+		SELECT DISTINCT DEPARTMENT_ID, DEPARTMENT_NAME ||' '|| DEPARTMENT_ID AS DEPARTMENT_NAME
+			FROM DEPARTMENTS
+			ORDER BY DEPARTMENT_ID
+	</select>
+	
+	 <!--  사원수정  -->
+   <update id ="updateEmp"> <!-- update는resultType이 없음 -->
+      UPDATE EMPLOYEES
+      <set>
+         <if test="lastName != null"> last_name= #{lastName} </if>
+         <if test="salary != null"  > salary= #{salary}      </if>
+      </set>
+      where EMPLOYEE_ID=#{employeeId}
+   </update>
+
+</mapper>
