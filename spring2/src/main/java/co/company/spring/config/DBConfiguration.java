@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@ComponentScan(basePackages = "co.company")
+@ComponentScan(basePackages = "co.company") // DAO가 스캔안돼서 적어준거
 public class DBConfiguration {
 	  
 	//데이터소스 등록
