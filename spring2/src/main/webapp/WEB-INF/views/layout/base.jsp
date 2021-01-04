@@ -15,10 +15,10 @@
    <body>
    베이스 입니다.
     <section class="content">
-      <tiles:insertAttribute name="header"/> <!--  /WEB-INF/views/common/layout/header.jsp -->
+      <!--  tiles:insertAttribute name="header"/> /WEB-INF/views/common/layout/header.jsp -->
       <tiles:insertAttribute name="body"/> <!-- body -->
 
-      <tiles:insertAttribute name="footer"/> <!-- /WEB-INF/views/common/layout/footer.jsp -->
+      <!-- tiles:insertAttribute name="footer"/> /WEB-INF/views/common/layout/footer.jsp -->
     </section>
   </body>
 </html>
